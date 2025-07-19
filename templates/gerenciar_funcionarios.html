@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Funcionários{% endblock %}
+{% block page_title %}Gerenciar Funcionários{% endblock %}
+
+{% block content %}
+<!-- Botão Adicionar Funcionário -->
+<div class="mb-6">
+    <button class="btn btn-primary" onclick="toggleModal('addFuncionarioModal')">
+        <i data-lucide="user-plus"></i>
+        Adicionar Funcionário
+    </button>
+</div>
+
+<!-- Lista de Funcionários -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="users"></i>
+            Funcionários Cadastrados
+        </h3>
+        <p class="card-subtitle">Gerencie sua equipe de funcionários</p>
+    </div>
+
+    {% if funcionarios %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Nome</th>
+                    <th>Contato</th>
+                    <th>Valor/Comissão</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for funcionario in funcionarios %}
+                <tr>
+                    <td>
+                        <img src="{{ funcionario[8] or '/static/uploads/default-user.jpg' }}" 
+                             alt="Foto" 
+                             class="table-avatar">
+                    </td>
+                    <td>
+                        <div>
+                            <div class="font-medium">{{ funcionario[1] }}</div>
+                            <div class="text-sm text-muted">{{ funcionario[2] }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-info">
+                            {% if funcionario[3] %}
+                            <div class="contact-item">
+                                <i data-lucide="phone"></i>
+                                <span>{{ funcionario[3] }}</span>
+                            </div>
+                            {% endif %}
+                            {% if funcionario[4] %}
+                            <div class="contact-item">
+                                <i data-lucide="message-circle"></i>
+                                <span>{{ funcionario[4] }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="valor-info">
+                            {% if funcionario[6] == 'porcentagem' %}
+                                <span class="badge badge-info">{{ funcionario[5] }}%</span>
+                                <small class="text-muted">Comissão</small>
+                            {% else %}
+                                <span class="badge badge-success">R$ {{ "%.2f"|format(funcionario[5]) }}</span>
+                                <small class="text-muted">Valor fixo</small>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if funcionario[7] %}
+                            <span class="badge badge-success">
+                                <i data-lucide="check-circle"></i>
+                                Ativo
+                            </span>
+                        {% else %}
+                            <span class="badge badge-error">
+                                <i data-lucide="x-circle"></i>
+                                Inativo
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('editar_funcionario', funcionario_id=funcionario[0]) }}" 
+                               class="btn btn-secondary btn-sm">
+                                <i data-lucide="edit"></i>
+                                Editar
+                            </a>
+                            <a href="{{ url_for('agenda_funcionario', funcionario_id=funcionario[0]) }}" 
+                               class="btn btn-info btn-sm">
+                                <i data-lucide="calendar"></i>
+                                Agenda
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i data-lucide="users" class="empty-icon"></i>
+        <h3>Nenhum funcionário cadastrado</h3>
+        <p>Adicione funcionários para começar a gerenciar sua equipe</p>
+        <button class="btn btn-primary" onclick="toggleModal('addFuncionarioModal')">
+            <i data-lucide="user-plus"></i>
+            Adicionar Primeiro Funcionário
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Adicionar Funcionário -->
+<div class="modal" id="addFuncionarioModal">
+    <div class="modal-overlay" onclick="toggleModal('addFuncionarioModal')"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i data-lucide="user-plus"></i>
+                Adicionar Funcionário
+            </h3>
+            <button class="modal-close" onclick="toggleModal('addFuncionarioModal')">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('adicionar_funcionario') }}" enctype="multipart/form-data">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="nome" class="form-label">
+                        <i data-lucide="user"></i>
+                        Nome completo
+                    </label>
+                    <input type="text" 
+                           id="nome" 
+                           name="nome" 
+                           class="form-input" 
+                           placeholder="Nome do funcionário"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        <i data-lucide="mail"></i>
+                        E-mail
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           class="form-input" 
+                           placeholder="email@exemplo.com"
+                           required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group">
+                        <label for="telefone" class="form-label">
+                            <i data-lucide="phone"></i>
+                            Telefone
+                        </label>
+                        <input type="tel" 
+                               id="telefone" 
+                               name="telefone" 
+                               class="form-input" 
+                               placeholder="(11) 99999-9999">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="whatsapp" class="form-label">
+                            <i data-lucide="message-circle"></i>
+                            WhatsApp
+                        </label>
+                        <input type="tel" 
+                               id="whatsapp" 
+                               name="whatsapp" 
+                               class="form-input" 
+                               placeholder="11999999999">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha" class="form-label">
+                        <i data-lucide="lock"></i>
+                        Senha
+                    </label>
+                    <input type="password" 
+                           id="senha" 
+                           name="senha" 
+                           class="form-input" 
+                           placeholder="••••••••"
+                           required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group">
+                        <label for="valor_corte" class="form-label">
+                            <i data-lucide="dollar-sign"></i>
+                            Valor/Comissão
+                        </label>
+                        <input type="number" 
+                               id="valor_corte" 
+                               name="valor_corte" 
+                               class="form-input" 
+                               placeholder="25.00"
+                               step="0.01"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipo_pagamento" class="form-label">
+                            <i data-lucide="percent"></i>
+                            Tipo
+                        </label>
+                        <select id="tipo_pagamento" name="tipo_pagamento" class="form-select" required>
+                            <option value="fixo">Valor Fixo (R$)</option>
+                            <option value="porcentagem">Comissão (%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="foto_perfil" class="form-label">
+                        <i data-lucide="camera"></i>
+                        Foto de perfil
+                    </label>
+                    <input type="file" 
+                           id="foto_perfil" 
+                           name="foto_perfil" 
+                           class="form-file"
+                           accept="image/*">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="toggleModal('addFuncionarioModal')">
+                    <i data-lucide="x"></i>
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="save"></i>
+                    Adicionar Funcionário
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.table-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.contact-item i {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+}
+
+.valor-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.action-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-2xl);
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--text-muted);
+    margin: 0 auto var(--spacing-lg);
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-xl);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-title i {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-light);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: var(--spacing-xl);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+    border-top: 1px solid var(--border-color);
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .modal-content {
+        margin: var(--spacing-md);
+        max-height: calc(100vh - 2rem);
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 800px;
+    }
+}
+</style>
+
+<script>
+function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.toggle('active');
+    
+    if (modal.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+}
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) {
+            activeModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+});
+</script>
+{% endblock %}
