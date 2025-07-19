@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Cliente - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-user-edit"></i> Editar Cliente</h1>
+    <p>Atualize as informações do cliente {{ cliente[1] }}</p>
+</div>
+
+<div class="card">
+    <form method="POST" enctype="multipart/form-data">
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="nome">Nome Completo:</label>
+                <input type="text" id="nome" name="nome" class="form-control" value="{{ cliente[1] }}" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" class="form-control" value="{{ cliente[2] }}" disabled>
+                <small style="color: #666;">O email não pode ser alterado</small>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="telefone">Telefone:</label>
+                <input type="text" id="telefone" name="telefone" class="form-control" value="{{ cliente[3] or '' }}" placeholder="(11) 99999-9999">
+            </div>
+            <div class="form-group">
+                <label for="whatsapp">WhatsApp:</label>
+                <input type="text" id="whatsapp" name="whatsapp" class="form-control" value="{{ cliente[4] or '' }}" placeholder="11999999999">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="foto_perfil">Foto de Perfil:</label>
+            <input type="file" id="foto_perfil" name="foto_perfil" class="form-control" accept="image/*">
+            {% if cliente[5] %}
+                <small style="color: #666;">Foto atual: <img src="{{ cliente[5] }}" alt="Foto atual" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-left: 10px;"></small>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn">
+                <i class="fas fa-save"></i> Salvar Alterações
+            </button>
+            <a href="{{ url_for('listar_clientes') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Funcionário - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-calendar-alt"></i> Minha Agenda</h1>
+    <p>Bem-vindo, {{ session.nome_usuario }}! Aqui estão seus agendamentos.</p>
+</div>
+
+<!-- Filtro por Data -->
+<div class="card">
+    <h3><i class="fas fa-filter"></i> Filtrar por Data</h3>
+    <form method="GET" class="filter-form">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="data_filtro">Data:</label>
+                <input type="date" id="data_filtro" name="data_filtro" class="form-control" 
+                       value="{{ data_filtro or '' }}">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+                <a href="{{ url_for('dashboard_funcionario') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Limpar
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Estatísticas do Funcionário -->
+{% if faturamento %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-cut"></i>
+        </div>
+        <div class="stat-value">{{ faturamento[0] or 0 }}</div>
+        <div class="stat-label">Cortes {{ 'no Dia' if data_filtro else 'no Mês' }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(faturamento[1] or 0) }}</div>
+        <div class="stat-label">Total Faturado</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(faturamento[4] or 0) }}</div>
+        <div class="stat-label">Meu Valor</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            {% if faturamento[3] == 'porcentagem' %}
+                <i class="fas fa-percentage"></i>
+            {% else %}
+                <i class="fas fa-coins"></i>
+            {% endif %}
+        </div>
+        <div class="stat-value">
+            {% if faturamento[3] == 'porcentagem' %}
+                {{ faturamento[2] }}%
+            {% else %}
+                R$ {{ "%.2f"|format(faturamento[2]) }}
+            {% endif %}
+        </div>
+        <div class="stat-label">Tipo de Pagamento</div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Lista de Agendamentos -->
+<div class="card">
+    <h3><i class="fas fa-list"></i> 
+        {% if data_filtro %}
+            Agendamentos do dia {{ data_filtro }}
+        {% else %}
+            Todos os Agendamentos
+        {% endif %}
+    </h3>
+    
+    {% if agendamentos %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Contato</th>
+                        <th>Serviço</th>
+                        <th>Data/Hora</th>
+                        <th>Status</th>
+                        <th>Valor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agendamento in agendamentos %}
+                    <tr>
+                        <td><strong>{{ agendamento[1] }}</strong></td>
+                        <td>
+                            {% if agendamento[2] %}
+                                <i class="fas fa-phone"></i> {{ agendamento[2] }}<br>
+                            {% endif %}
+                            {% if agendamento[3] %}
+                                <i class="fab fa-whatsapp"></i> {{ agendamento[3] }}
+                            {% endif %}
+                        </td>
+                        <td>{{ agendamento[4] }}</td>
+                        <td>
+                            {% if data_filtro %}
+                                <strong>{{ agendamento[8].strftime('%H:%M') if agendamento[8] else agendamento[5] }}</strong>
+                            {% else %}
+                                {{ agendamento[5] }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ agendamento[6] }}">
+                                {% if agendamento[6] == 'pendente' %}
+                                    Pendente
+                                {% elif agendamento[6] == 'confirmado' %}
+                                    Confirmado
+                                {% elif agendamento[6] == 'concluido' %}
+                                    Concluído
+                                {% elif agendamento[6] == 'cancelado' %}
+                                    Cancelado
+                                {% elif agendamento[6] == 'aguardando_confirmacao' %}
+                                    Aguardando
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="money">R$ {{ "%.2f"|format(agendamento[7]) }}</td>
+                        <td>
+                            {% if agendamento[6] == 'confirmado' %}
+                                <a href="{{ url_for('concluir_atendimento', agendamento_id=agendamento[0]) }}" 
+                                   class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;"
+                                   onclick="return confirm('Confirmar que o atendimento foi concluído?')">
+                                    <i class="fas fa-check"></i> Concluir
+                                </a>
+                            {% endif %}
+                            {% if agendamento[3] %}
+                                <a href="https://wa.me/55{{ agendamento[3].replace('(', '').replace(')', '').replace('-', '').replace(' ', '') }}" 
+                                   target="_blank" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">
+            {% if data_filtro %}
+                Nenhum agendamento encontrado para esta data.
+            {% else %}
+                Você ainda não possui agendamentos.
+            {% endif %}
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

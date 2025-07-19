@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .navbar {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #64ffda;
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #e0e0e0;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: #64ffda;
+            background: rgba(100, 255, 218, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #64ffda;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .card {
+            background: #2d2d2d;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            border: 1px solid #404040;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #555 0%, #777 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #555;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: #404040;
+            color: #e0e0e0;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #64ffda;
+            box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #999;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #1b5e20;
+            color: #c8e6c9;
+            border: 1px solid #2e7d32;
+        }
+
+        .alert-error {
+            background: #b71c1c;
+            color: #ffcdd2;
+            border: 1px solid #d32f2f;
+        }
+
+        .alert-info {
+            background: #0d47a1;
+            color: #bbdefb;
+            border: 1px solid #1976d2;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #555;
+        }
+
+        .table th {
+            background: #404040;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .table tr:hover {
+            background: #404040;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #2d2d2d;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid #404040;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #64ffda;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pendente {
+            background: #5d4037;
+            color: #ffcc02;
+        }
+
+        .status-confirmado {
+            background: #1b5e20;
+            color: #4caf50;
+        }
+
+        .status-concluido {
+            background: #0d47a1;
+            color: #2196f3;
+        }
+
+        .status-cancelado {
+            background: #b71c1c;
+            color: #f44336;
+        }
+
+        .status-aguardando_confirmacao {
+            background: #424242;
+            color: #bbb;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        .filter-form {
+            background: #404040;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border: 1px solid #555;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .money {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .percentage-badge {
+            background: #0d47a1;
+            color: #64b5f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .fixed-badge {
+            background: #4a148c;
+            color: #ba68c8;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Melhorias específicas para tema escuro */
+        select.form-control {
+            background: #404040;
+            color: #e0e0e0;
+        }
+
+        select.form-control option {
+            background: #404040;
+            color: #e0e0e0;
+        }
+
+        input[type="file"].form-control {
+            background: #404040;
+            color: #e0e0e0;
+        }
+
+        textarea.form-control {
+            background: #404040;
+            color: #e0e0e0;
+        }
+
+        .table-responsive {
+            background: #2d2d2d;
+            border-radius: 8px;
+        }
+
+        small {
+            color: #bbb;
+        }
+
+        strong {
+            color: #e0e0e0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: #e0e0e0;
+        }
+
+        p {
+            color: #bbb;
+        }
+
+        /* Links */
+        a {
+            color: #64ffda;
+        }
+
+        a:hover {
+            color: #4dd0e1;
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            accent-color: #64ffda;
+        }
+
+        /* Progress bar for fidelity */
+        .progress-bar {
+            background: #555;
+            border-radius: 10px;
+            height: 20px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    {% if session.usuario_id %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                {% if configuracoes_barbearia and configuracoes_barbearia.logo_url %}
+                    <img src="{{ configuracoes_barbearia.logo_url }}" alt="Logo">
+                {% else %}
+                    <i class="fas fa-cut"></i>
+                {% endif %}
+                <span>{{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}</span>
+            </div>
+            
+            <div class="nav-links">
+                {% if session.tipo_usuario == 'admin' %}
+                    <a href="{{ url_for('dashboard_admin') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="{{ url_for('gerenciar_funcionarios') }}"><i class="fas fa-users"></i> Funcionários</a>
+                    <a href="{{ url_for('listar_clientes') }}"><i class="fas fa-user-friends"></i> Clientes</a>
+                    <a href="{{ url_for('configuracoes_barbearia') }}"><i class="fas fa-cog"></i> Configurações</a>
+                {% elif session.tipo_usuario == 'funcionario' %}
+                    <a href="{{ url_for('dashboard_funcionario') }}"><i class="fas fa-calendar-alt"></i> Minha Agenda</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard_cliente') }}"><i class="fas fa-home"></i> Início</a>
+                    <a href="{{ url_for('agendamento') }}"><i class="fas fa-plus"></i> Agendar</a>
+                {% endif %}
+                <a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a>
+            </div>
+            
+            <div class="user-info">
+                <img src="{{ session.foto_perfil or '/static/uploads/default-user.jpg' }}" alt="Avatar" class="user-avatar">
+                <span>{{ session.nome_usuario }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'erro' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

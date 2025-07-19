@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+    <div class="card" style="max-width: 500px; width: 100%;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            {% if configuracoes_barbearia and configuracoes_barbearia.logo_url %}
+                <img src="{{ configuracoes_barbearia.logo_url }}" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;">
+            {% else %}
+                <i class="fas fa-cut" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+            {% endif %}
+            <h2>Criar Conta</h2>
+            <p style="color: #666;">Cadastre-se para agendar seus cortes</p>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="nome">Nome Completo:</label>
+                <input type="text" id="nome" name="nome" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="telefone">Telefone:</label>
+                    <input type="text" id="telefone" name="telefone" class="form-control" placeholder="(11) 99999-9999">
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp">WhatsApp:</label>
+                    <input type="text" id="whatsapp" name="whatsapp" class="form-control" placeholder="11999999999">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; margin-bottom: 1rem;">
+                <i class="fas fa-user-plus"></i> Criar Conta
+            </button>
+        </form>
+
+        <div style="text-align: center;">
+            <p>Já tem uma conta? <a href="{{ url_for('login') }}" style="color: #667eea; text-decoration: none;">Faça login aqui</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

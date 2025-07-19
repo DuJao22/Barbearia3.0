@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-tachometer-alt"></i> Dashboard Administrativo</h1>
+    <p>Bem-vindo ao painel de controle da barbearia</p>
+</div>
+
+<!-- Estatísticas Gerais -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(estatisticas.faturamento_mensal) }}</div>
+        <div class="stat-label">Faturamento Mensal</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-week"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(estatisticas.faturamento_semanal) }}</div>
+        <div class="stat-label">Faturamento Semanal</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(estatisticas.faturamento_diario) }}</div>
+        <div class="stat-label">Faturamento Hoje</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ estatisticas.total_clientes }}</div>
+        <div class="stat-label">Total de Clientes</div>
+    </div>
+</div>
+
+<!-- Status dos Agendamentos -->
+<div class="card">
+    <h3><i class="fas fa-chart-bar"></i> Status dos Agendamentos</h3>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" style="color: #856404;">{{ estatisticas.pendentes }}</div>
+            <div class="stat-label">Pendentes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #383d41;">{{ estatisticas.aguardando }}</div>
+            <div class="stat-label">Aguardando Confirmação</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #155724;">{{ estatisticas.confirmados }}</div>
+            <div class="stat-label">Confirmados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #0c5460;">{{ estatisticas.concluidos }}</div>
+            <div class="stat-label">Concluídos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #721c24;">{{ estatisticas.cancelados }}</div>
+            <div class="stat-label">Cancelados</div>
+        </div>
+    </div>
+</div>
+
+<!-- Faturamento por Funcionário -->
+<div class="card">
+    <h3><i class="fas fa-users-cog"></i> Faturamento por Funcionário (Mês Atual)</h3>
+    {% if estatisticas.cortes_por_funcionario %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Cortes Realizados</th>
+                        <th>Total Faturado</th>
+                        <th>Tipo Pagamento</th>
+                        <th>Valor do Funcionário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for funcionario in estatisticas.cortes_por_funcionario %}
+                    <tr>
+                        <td><strong>{{ funcionario[0] }}</strong></td>
+                        <td>{{ funcionario[1] }} cortes</td>
+                        <td class="money">R$ {{ "%.2f"|format(funcionario[2]) }}</td>
+                        <td>
+                            {% if funcionario[4] == 'porcentagem' %}
+                                <span class="percentage-badge">{{ funcionario[3] }}%</span>
+                            {% else %}
+                                <span class="fixed-badge">R$ {{ "%.2f"|format(funcionario[3]) }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="money">R$ {{ "%.2f"|format(funcionario[5]) }}</td>
+                        <td>
+                            {% for func in funcionarios %}
+                                {% if func[1] == funcionario[0] %}
+                                    <a href="{{ url_for('agenda_funcionario', funcionario_id=func[0]) }}" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                        <i class="fas fa-calendar"></i> Ver Agenda
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">Nenhum corte realizado este mês.</p>
+    {% endif %}
+</div>
+
+<!-- Agendamentos Pendentes de Confirmação -->
+{% if agendamentos_pendentes %}
+<div class="card">
+    <h3><i class="fas fa-clock"></i> Agendamentos Aguardando Confirmação</h3>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Funcionário</th>
+                    <th>Serviço</th>
+                    <th>Data/Hora</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agendamento in agendamentos_pendentes %}
+                <tr>
+                    <td>
+                        <strong>{{ agendamento[1] }}</strong><br>
+                        <small>{{ agendamento[2] }} | {{ agendamento[3] }}</small>
+                    </td>
+                    <td>{{ agendamento[4] }}</td>
+                    <td>{{ agendamento[5] }}</td>
+                    <td>{{ agendamento[6] }}</td>
+                    <td class="money">R$ {{ "%.2f"|format(agendamento[8]) }}</td>
+                    <td>
+                        <a href="{{ url_for('confirmar_agendamento', agendamento_id=agendamento[0]) }}" 
+                           class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;">
+                            <i class="fas fa-check"></i> Confirmar
+                        </a>
+                        <a href="{{ url_for('cancelar_agendamento', agendamento_id=agendamento[0]) }}" 
+                           class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;"
+                           onclick="return confirm('Tem certeza que deseja cancelar este agendamento?')">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Clientes Recentes -->
+<div class="card">
+    <h3><i class="fas fa-user-friends"></i> Clientes Cadastrados</h3>
+    {% if clientes %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Cortes Realizados</th>
+                        <th>Cortes Gratuitos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes[:10] %}
+                    <tr>
+                        <td><strong>{{ cliente[1] }}</strong></td>
+                        <td>{{ cliente[2] }}</td>
+                        <td>{{ cliente[3] }}</td>
+                        <td>{{ cliente[6] }}</td>
+                        <td>{{ cliente[7] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if clientes|length > 10 %}
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="{{ url_for('listar_clientes') }}" class="btn">Ver Todos os Clientes</a>
+            </div>
+        {% endif %}
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">Nenhum cliente cadastrado ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

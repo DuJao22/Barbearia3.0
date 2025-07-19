@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Cliente - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-home"></i> Bem-vindo, {{ session.nome_usuario }}!</h1>
+    <p>Gerencie seus agendamentos e acompanhe sua fidelidade</p>
+</div>
+
+<!-- Programa de Fidelidade -->
+{% if fidelidade %}
+<div class="card">
+    <h3><i class="fas fa-star"></i> Programa de Fidelidade</h3>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-cut"></i>
+            </div>
+            <div class="stat-value">{{ fidelidade[2] }}</div>
+            <div class="stat-label">Cortes Realizados</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-gift"></i>
+            </div>
+            <div class="stat-value">{{ fidelidade[3] }}</div>
+            <div class="stat-label">Cortes Gratuitos Disponíveis</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-value">{{ 10 - (fidelidade[2] % 10) }}</div>
+            <div class="stat-label">Cortes para o Próximo Gratuito</div>
+        </div>
+    </div>
+
+    {% if fidelidade[3] > 0 %}
+        <div style="background: #1b5e20; color: #c8e6c9; padding: 1rem; border-radius: 8px; margin-top: 1rem; text-align: center; border: 1px solid #2e7d32;">
+            <i class="fas fa-gift"></i> <strong>Parabéns!</strong> Você tem {{ fidelidade[3] }} corte(s) gratuito(s) disponível(is)!
+            <br><a href="{{ url_for('agendamento') }}" class="btn btn-success" style="margin-top: 0.5rem;">Agendar Corte Gratuito</a>
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Ação Rápida -->
+<div class="card" style="text-align: center;">
+    <h3><i class="fas fa-plus-circle"></i> Agendar Novo Corte</h3>
+    <p>Reserve seu horário com nossos profissionais</p>
+    <a href="{{ url_for('agendamento') }}" class="btn" style="font-size: 1.2rem; padding: 1rem 2rem;">
+        <i class="fas fa-calendar-plus"></i> Fazer Agendamento
+    </a>
+</div>
+
+<!-- Meus Agendamentos -->
+<div class="card">
+    <h3><i class="fas fa-calendar-alt"></i> Meus Agendamentos</h3>
+    
+    {% if agendamentos %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Serviço</th>
+                        <th>Data/Hora</th>
+                        <th>Status</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agendamento in agendamentos %}
+                    <tr>
+                        <td><strong>{{ agendamento[1] }}</strong></td>
+                        <td>{{ agendamento[2] }}</td>
+                        <td>{{ agendamento[3] }}</td>
+                        <td>
+                            <span class="status-badge status-{{ agendamento[4] }}">
+                                {% if agendamento[4] == 'pendente' %}
+                                    Pendente
+                                {% elif agendamento[4] == 'confirmado' %}
+                                    Confirmado
+                                {% elif agendamento[4] == 'concluido' %}
+                                    Concluído
+                                {% elif agendamento[4] == 'cancelado' %}
+                                    Cancelado
+                                {% elif agendamento[4] == 'aguardando_confirmacao' %}
+                                    Aguardando Confirmação
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="money">
+                            {% if agendamento[5] == 0 %}
+                                <span style="color: #28a745; font-weight: bold;">GRATUITO</span>
+                            {% else %}
+                                R$ {{ "%.2f"|format(agendamento[5]) }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">
+            Você ainda não possui agendamentos.<br>
+            <a href="{{ url_for('agendamento') }}" class="btn" style="margin-top: 1rem;">Fazer Primeiro Agendamento</a>
+        </p>
+    {% endif %}
+</div>
+
+<!-- Informações da Barbearia -->
+{% if configuracoes_barbearia %}
+<div class="card">
+    <h3><i class="fas fa-info-circle"></i> Informações da Barbearia</h3>
+    <div class="grid-2">
+        <div>
+            <p><strong><i class="fas fa-map-marker-alt"></i> Endereço:</strong><br>{{ configuracoes_barbearia.endereco }}</p>
+            <p><strong><i class="fas fa-clock"></i> Funcionamento:</strong><br>{{ configuracoes_barbearia.horario_funcionamento }}<br>{{ configuracoes_barbearia.dias_funcionamento }}</p>
+        </div>
+        <div>
+            {% if configuracoes_barbearia.telefone_contato %}
+                <p><strong><i class="fas fa-phone"></i> Telefone:</strong><br>{{ configuracoes_barbearia.telefone_contato }}</p>
+            {% endif %}
+            {% if configuracoes_barbearia.whatsapp_contato %}
+                <p><strong><i class="fab fa-whatsapp"></i> WhatsApp:</strong><br>
+                    <a href="https://wa.me/55{{ configuracoes_barbearia.whatsapp_contato }}" target="_blank" class="btn btn-success" style="padding: 0.5rem 1rem;">
+                        <i class="fab fa-whatsapp"></i> Entrar em Contato
+                    </a>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if configuracoes_barbearia.descricao %}
+        <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #555;">
+            <strong>Sobre nós:</strong><br>{{ configuracoes_barbearia.descricao }}
+        </p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Agenda de {{ funcionario[1] }} - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-calendar-alt"></i> Agenda de {{ funcionario[1] }}</h1>
+    <p>Visualize e gerencie a agenda do funcionário</p>
+</div>
+
+<!-- Filtro por Período -->
+<div class="card">
+    <h3><i class="fas fa-filter"></i> Filtrar por Período</h3>
+    <form method="GET" class="filter-form">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="data_inicio">Data Início:</label>
+                <input type="date" id="data_inicio" name="data_inicio" class="form-control" 
+                       value="{{ data_inicio }}">
+            </div>
+            <div class="form-group">
+                <label for="data_fim">Data Fim:</label>
+                <input type="date" id="data_fim" name="data_fim" class="form-control" 
+                       value="{{ data_fim }}">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+                <a href="{{ url_for('agenda_funcionario', funcionario_id=funcionario[0]) }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hoje
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Estatísticas do Período -->
+{% if faturamento %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-cut"></i>
+        </div>
+        <div class="stat-value">{{ faturamento[0] or 0 }}</div>
+        <div class="stat-label">Cortes no Período</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(faturamento[1] or 0) }}</div>
+        <div class="stat-label">Total Faturado</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="stat-value money">R$ {{ "%.2f"|format(faturamento[4] or 0) }}</div>
+        <div class="stat-label">Valor do Funcionário</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            {% if faturamento[3] == 'porcentagem' %}
+                <i class="fas fa-percentage"></i>
+            {% else %}
+                <i class="fas fa-coins"></i>
+            {% endif %}
+        </div>
+        <div class="stat-value">
+            {% if faturamento[3] == 'porcentagem' %}
+                {{ faturamento[2] }}%
+            {% else %}
+                R$ {{ "%.2f"|format(faturamento[2]) }}
+            {% endif %}
+        </div>
+        <div class="stat-label">Tipo de Pagamento</div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Informações do Funcionário -->
+<div class="card">
+    <h3><i class="fas fa-user"></i> Informações do Funcionário</h3>
+    <div class="grid-2">
+        <div>
+            <p><strong>Nome:</strong> {{ funcionario[1] }}</p>
+            <p><strong>Email:</strong> {{ funcionario[2] }}</p>
+            <p><strong>Telefone:</strong> {{ funcionario[3] }}</p>
+            <p><strong>WhatsApp:</strong> {{ funcionario[4] }}</p>
+        </div>
+        <div>
+            <p><strong>Valor por Corte:</strong> 
+                {% if funcionario[6] == 'porcentagem' %}
+                    <span class="percentage-badge">{{ funcionario[5] }}%</span>
+                {% else %}
+                    <span class="fixed-badge">R$ {{ "%.2f"|format(funcionario[5]) }}</span>
+                {% endif %}
+            </p>
+            <p><strong>Tipo de Pagamento:</strong> 
+                {% if funcionario[6] == 'porcentagem' %}
+                    Porcentagem
+                {% else %}
+                    Valor Fixo
+                {% endif %}
+            </p>
+            <p><strong>Status:</strong> 
+                {% if funcionario[7] %}
+                    <span style="color: #28a745;">Ativo</span>
+                {% else %}
+                    <span style="color: #dc3545;">Inativo</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Agenda Detalhada -->
+<div class="card">
+    <h3><i class="fas fa-list"></i> Agenda do Período</h3>
+    
+    {% if agenda %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Cliente</th>
+                        <th>Contato</th>
+                        <th>Serviço</th>
+                        <th>Status</th>
+                        <th>Valor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agendamento in agenda %}
+                    <tr>
+                        <td><strong>{{ agendamento[8] }}</strong></td>
+                        <td><strong>{{ agendamento[9] }}</strong></td>
+                        <td>{{ agendamento[1] }}</td>
+                        <td>
+                            {% if agendamento[2] %}
+                                <i class="fas fa-phone"></i> {{ agendamento[2] }}<br>
+                            {% endif %}
+                            {% if agendamento[3] %}
+                                <i class="fab fa-whatsapp"></i> {{ agendamento[3] }}
+                            {% endif %}
+                        </td>
+                        <td>{{ agendamento[4] }}</td>
+                        <td>
+                            <span class="status-badge status-{{ agendamento[6] }}">
+                                {% if agendamento[6] == 'pendente' %}
+                                    Pendente
+                                {% elif agendamento[6] == 'confirmado' %}
+                                    Confirmado
+                                {% elif agendamento[6] == 'concluido' %}
+                                    Concluído
+                                {% elif agendamento[6] == 'cancelado' %}
+                                    Cancelado
+                                {% elif agendamento[6] == 'aguardando_confirmacao' %}
+                                    Aguardando
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="money">R$ {{ "%.2f"|format(agendamento[7]) }}</td>
+                        <td>
+                            {% if agendamento[6] == 'aguardando_confirmacao' %}
+                                <a href="{{ url_for('confirmar_agendamento', agendamento_id=agendamento[0]) }}" 
+                                   class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.25rem;">
+                                    <i class="fas fa-check"></i> Confirmar
+                                </a>
+                                <a href="{{ url_for('cancelar_agendamento', agendamento_id=agendamento[0]) }}" 
+                                   class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;"
+                                   onclick="return confirm('Tem certeza que deseja cancelar este agendamento?')">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            {% elif agendamento[6] == 'confirmado' %}
+                                <a href="{{ url_for('concluir_atendimento', agendamento_id=agendamento[0]) }}" 
+                                   class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;"
+                                   onclick="return confirm('Confirmar que o atendimento foi concluído?')">
+                                    <i class="fas fa-check"></i> Concluir
+                                </a>
+                            {% endif %}
+                            {% if agendamento[3] %}
+                                <a href="https://wa.me/55{{ agendamento[3].replace('(', '').replace(')', '').replace('-', '').replace(' ', '') }}" 
+                                   target="_blank" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">
+            Nenhum agendamento encontrado para este período.
+        </p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{{ url_for('dashboard_admin') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Funcionários - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-users-cog"></i> Gerenciar Funcionários</h1>
+    <p>Adicione e gerencie os funcionários da barbearia</p>
+</div>
+
+<!-- Formulário para Adicionar Funcionário -->
+<div class="card">
+    <h3><i class="fas fa-user-plus"></i> Adicionar Novo Funcionário</h3>
+    <form method="POST" action="{{ url_for('adicionar_funcionario') }}" enctype="multipart/form-data">
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="nome">Nome Completo:</label>
+                <input type="text" id="nome" name="nome" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="telefone">Telefone:</label>
+                <input type="text" id="telefone" name="telefone" class="form-control" placeholder="(11) 99999-9999">
+            </div>
+            <div class="form-group">
+                <label for="whatsapp">WhatsApp:</label>
+                <input type="text" id="whatsapp" name="whatsapp" class="form-control" placeholder="11999999999">
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div class="form-group">
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="valor_corte">Valor por Corte:</label>
+                <input type="number" id="valor_corte" name="valor_corte" class="form-control" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="tipo_pagamento">Tipo de Pagamento:</label>
+                <select id="tipo_pagamento" name="tipo_pagamento" class="form-control" required>
+                    <option value="fixo">Valor Fixo por Corte</option>
+                    <option value="porcentagem">Porcentagem do Valor</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="foto_perfil">Foto de Perfil:</label>
+            <input type="file" id="foto_perfil" name="foto_perfil" class="form-control" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn">
+            <i class="fas fa-plus"></i> Adicionar Funcionário
+        </button>
+    </form>
+</div>
+
+<!-- Lista de Funcionários -->
+<div class="card">
+    <h3><i class="fas fa-list"></i> Funcionários Cadastrados</h3>
+    
+    {% if funcionarios %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Contato</th>
+                        <th>Valor por Corte</th>
+                        <th>Tipo Pagamento</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for funcionario in funcionarios %}
+                    <tr>
+                        <td><strong>{{ funcionario[1] }}</strong></td>
+                        <td>{{ funcionario[2] }}</td>
+                        <td>
+                            {% if funcionario[3] %}
+                                <i class="fas fa-phone"></i> {{ funcionario[3] }}<br>
+                            {% endif %}
+                            {% if funcionario[4] %}
+                                <i class="fab fa-whatsapp"></i> {{ funcionario[4] }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if funcionario[6] == 'porcentagem' %}
+                                <span class="percentage-badge">{{ funcionario[5] }}%</span>
+                            {% else %}
+                                <span class="fixed-badge">R$ {{ "%.2f"|format(funcionario[5]) }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if funcionario[6] == 'porcentagem' %}
+                                Porcentagem
+                            {% else %}
+                                Valor Fixo
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if funcionario[7] %}
+                                <span style="color: #28a745; font-weight: bold;">Ativo</span>
+                            {% else %}
+                                <span style="color: #dc3545; font-weight: bold;">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('editar_funcionario', funcionario_id=funcionario[0]) }}" 
+                               class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.25rem;">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="{{ url_for('agenda_funcionario', funcionario_id=funcionario[0]) }}" 
+                               class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                <i class="fas fa-calendar"></i> Agenda
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">Nenhum funcionário cadastrado ainda.</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{{ url_for('dashboard_admin') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+    </a>
+</div>
+
+<script>
+    // Atualizar placeholder do valor baseado no tipo de pagamento
+    document.getElementById('tipo_pagamento').addEventListener('change', function() {
+        const valorInput = document.getElementById('valor_corte');
+        if (this.value === 'porcentagem') {
+            valorInput.placeholder = 'Ex: 50 (para 50%)';
+            valorInput.max = '100';
+        } else {
+            valorInput.placeholder = 'Ex: 25.00';
+            valorInput.removeAttribute('max');
+        }
+    });
+</script>
+{% endblock %}

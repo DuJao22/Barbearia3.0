@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes - {{ configuracoes_barbearia.nome_barbearia if configuracoes_barbearia else 'Barbearia Premium' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1><i class="fas fa-user-friends"></i> Gerenciar Clientes</h1>
+    <p>Visualize e gerencie todos os clientes cadastrados</p>
+</div>
+
+<div class="card">
+    <h3><i class="fas fa-list"></i> Clientes Cadastrados</h3>
+    
+    {% if clientes %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Contato</th>
+                        <th>Cortes Realizados</th>
+                        <th>Cortes Gratuitos</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <img src="{{ cliente[5] or '/static/uploads/default-user.jpg' }}" alt="Avatar" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                <strong>{{ cliente[1] }}</strong>
+                            </div>
+                        </td>
+                        <td>{{ cliente[2] }}</td>
+                        <td>
+                            {% if cliente[3] %}
+                                <i class="fas fa-phone"></i> {{ cliente[3] }}<br>
+                            {% endif %}
+                            {% if cliente[4] %}
+                                <i class="fab fa-whatsapp"></i> {{ cliente[4] }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="font-weight: bold; color: #667eea;">{{ cliente[6] }}</span>
+                        </td>
+                        <td>
+                            {% if cliente[7] > 0 %}
+                                <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
+                                    {{ cliente[7] }} disponível(is)
+                                </span>
+                            {% else %}
+                                <span style="color: #666;">Nenhum</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('editar_cliente', cliente_id=cliente[0]) }}" 
+                               class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.25rem;">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            {% if cliente[4] %}
+                                <a href="https://wa.me/55{{ cliente[4].replace('(', '').replace(')', '').replace('-', '').replace(' ', '') }}" 
+                                   target="_blank" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Estatísticas dos Clientes -->
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #555;">
+            <h4><i class="fas fa-chart-bar"></i> Estatísticas</h4>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value">{{ clientes|length }}</div>
+                    <div class="stat-label">Total de Clientes</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-cut"></i>
+                    </div>
+                    <div class="stat-value">{{ clientes|sum(attribute=6) }}</div>
+                    <div class="stat-label">Total de Cortes</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="stat-value">{{ clientes|sum(attribute=7) }}</div>
+                    <div class="stat-label">Cortes Gratuitos Disponíveis</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value">{{ (clientes|selectattr(6, 'gt', 0)|list|length / clientes|length * 100)|round(1) if clientes|length > 0 else 0 }}%</div>
+                    <div class="stat-label">Clientes Ativos</div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">Nenhum cliente cadastrado ainda.</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{{ url_for('dashboard_admin') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+    </a>
+</div>
+{% endblock %}
