@@ -2,28 +2,42 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 import os
 import banco
 import models
 
+# Carregar variáveis de ambiente
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = 'chave_secreta_barbearia_2025'
+app.secret_key = os.getenv('SECRET_KEY', 'chave_secreta_barbearia_2025')
 
 # Configurações de upload
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16777216))  # 16MB max
 
 # Criar pasta de uploads se não existir
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Testar conexão com o banco na inicialização
+print("🚀 Iniciando aplicação...")
+if banco.testar_conexao():
+    print("✅ Conexão com banco estabelecida!")
+    # Inicializar banco de dados
+    try:
+        banco.inicializar_banco()
+        print("✅ Banco de dados inicializado!")
+    except Exception as e:
+        print(f"❌ Erro ao inicializar banco: {e}")
+else:
+    print("❌ Falha na conexão com o banco!")
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# Inicializar banco de dados
-banco.inicializar_banco()
 
 @app.context_processor
 def inject_datetime():

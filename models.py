@@ -1,4 +1,4 @@
-import sqlite3
+import sqlitecloud
 from banco import obter_conexao
 from datetime import datetime, timedelta
 
@@ -23,7 +23,8 @@ def criar_usuario(nome, email, senha, telefone=None, whatsapp=None, tipo='client
                 conn.commit()
             
             return usuario_id
-        except sqlite3.IntegrityError:
+        except Exception as e:
+            print(f"Erro ao criar usuário: {e}")
             return None
 
 def buscar_usuario_por_email(email):
