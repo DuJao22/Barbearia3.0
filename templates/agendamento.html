@@ -4,9 +4,9 @@
 {% block page_title %}Novo Agendamento{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-2 gap-6">
+<div class="agendamento-container">
     <!-- Formulário de Agendamento -->
-    <div class="card">
+    <div class="card agendamento-form">
         <div class="card-header">
             <h3 class="card-title">
                 <i data-lucide="calendar-plus"></i>
@@ -93,7 +93,7 @@
     </div>
 
     <!-- Informações e Resumo -->
-    <div class="card">
+    <div class="card resumo-card">
         <div class="card-header">
             <h3 class="card-title">
                 <i data-lucide="info"></i>
@@ -173,10 +173,326 @@
 </div>
 
 <style>
-/* (todo o CSS permanece inalterado conforme original) */
+.agendamento-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+}
+
+.agendamento-form,
+.resumo-card {
+    height: fit-content;
+}
+
+.form-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+    margin-right: var(--spacing-sm);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.fidelidade-option {
+    padding: var(--spacing-lg);
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.fidelidade-option:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--primary-color);
+}
+
+.resumo-agendamento {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.resumo-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.resumo-item i {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-light);
+    flex-shrink: 0;
+}
+
+.resumo-item div {
+    flex: 1;
+}
+
+.resumo-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.resumo-value {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.resumo-total {
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: var(--radius-lg);
+    color: white;
+}
+
+.total-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-label {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.total-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.fidelidade-info {
+    padding: var(--spacing-lg);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.fidelidade-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.fidelidade-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.fidelidade-stat {
+    text-align: center;
+    padding: var(--spacing-md);
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-light);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.fidelidade-progress {
+    text-align: center;
+}
+
+.progress-info {
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--success-light));
+    border-radius: var(--radius-md);
+    transition: width var(--transition-normal);
+}
+
+@media (max-width: 1024px) {
+    .agendamento-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .fidelidade-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .total-item {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+    
+    .resumo-item {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-sm);
+    }
+}
 </style>
 
 <script>
-/* (todo o script permanece inalterado conforme original) */
+document.addEventListener('DOMContentLoaded', function() {
+    const funcionarioSelect = document.getElementById('funcionario_id');
+    const servicoSelect = document.getElementById('servico_id');
+    const dataInput = document.getElementById('data');
+    const horarioSelect = document.getElementById('horario');
+    const dataHoraInput = document.getElementById('data_hora');
+    const usarCorteGratuito = document.getElementById('usar_corte_gratuito');
+    
+    // Elementos do resumo
+    const resumoFuncionario = document.getElementById('resumoFuncionario');
+    const resumoServico = document.getElementById('resumoServico');
+    const resumoData = document.getElementById('resumoData');
+    const resumoHorario = document.getElementById('resumoHorario');
+    const resumoValor = document.getElementById('resumoValor');
+
+    function atualizarResumo() {
+        // Funcionário
+        const funcionarioOption = funcionarioSelect.options[funcionarioSelect.selectedIndex];
+        resumoFuncionario.textContent = funcionarioOption.text || 'Não selecionado';
+
+        // Serviço
+        const servicoOption = servicoSelect.options[servicoSelect.selectedIndex];
+        resumoServico.textContent = servicoOption.text || 'Não selecionado';
+
+        // Data
+        if (dataInput.value) {
+            const data = new Date(dataInput.value + 'T00:00:00');
+            resumoData.textContent = data.toLocaleDateString('pt-BR');
+        } else {
+            resumoData.textContent = 'Não selecionada';
+        }
+
+        // Horário
+        resumoHorario.textContent = horarioSelect.value || 'Não selecionado';
+
+        // Valor
+        let valor = 0;
+        if (servicoSelect.value) {
+            const servicoOption = servicoSelect.options[servicoSelect.selectedIndex];
+            valor = parseFloat(servicoOption.dataset.preco) || 0;
+            
+            if (usarCorteGratuito && usarCorteGratuito.checked) {
+                valor = 0;
+            }
+        }
+        resumoValor.textContent = `R$ ${valor.toFixed(2).replace('.', ',')}`;
+    }
+
+    function carregarHorarios() {
+        if (!funcionarioSelect.value || !dataInput.value) {
+            horarioSelect.disabled = true;
+            horarioSelect.innerHTML = '<option value="">Selecione primeiro a data e funcionário</option>';
+            return;
+        }
+
+        fetch(`/api/horarios_disponiveis?funcionario_id=${funcionarioSelect.value}&data=${dataInput.value}`)
+            .then(response => response.json())
+            .then(data => {
+                horarioSelect.innerHTML = '<option value="">Selecione um horário</option>';
+                
+                if (data.horarios_disponiveis && data.horarios_disponiveis.length > 0) {
+                    data.horarios_disponiveis.forEach(horario => {
+                        const option = document.createElement('option');
+                        option.value = horario;
+                        option.textContent = horario;
+                        horarioSelect.appendChild(option);
+                    });
+                    horarioSelect.disabled = false;
+                } else {
+                    horarioSelect.innerHTML = '<option value="">Nenhum horário disponível</option>';
+                    horarioSelect.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar horários:', error);
+                horarioSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+                horarioSelect.disabled = true;
+            });
+    }
+
+    // Event listeners
+    funcionarioSelect.addEventListener('change', function() {
+        carregarHorarios();
+        atualizarResumo();
+    });
+
+    servicoSelect.addEventListener('change', atualizarResumo);
+
+    dataInput.addEventListener('change', function() {
+        carregarHorarios();
+        atualizarResumo();
+    });
+
+    horarioSelect.addEventListener('change', function() {
+        if (dataInput.value && horarioSelect.value) {
+            dataHoraInput.value = `${dataInput.value} ${horarioSelect.value}:00`;
+        }
+        atualizarResumo();
+    });
+
+    if (usarCorteGratuito) {
+        usarCorteGratuito.addEventListener('change', atualizarResumo);
+    }
+
+    // Validação do formulário
+    document.getElementById('agendamentoForm').addEventListener('submit', function(e) {
+        if (!dataHoraInput.value) {
+            e.preventDefault();
+            alert('Por favor, selecione uma data e horário válidos.');
+        }
+    });
+
+    // Inicializar resumo
+    atualizarResumo();
+});
 </script>
 {% endblock %}

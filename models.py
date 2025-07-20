@@ -281,7 +281,7 @@ def listar_agendamentos_funcionario(funcionario_id, data_filtro=None):
         if data_filtro:
             cursor.execute('''
                 SELECT a.id, u.nome as cliente, u.telefone, u.whatsapp, s.nome as servico,
-                       datetime(a.data_hora, 'localtime') as data_hora_formatada, 
+                       strftime('%d/%m/%Y às %H:%M', a.data_hora) as data_hora_formatada, 
                        a.status, a.valor, a.data_hora
                 FROM agendamentos a
                 JOIN usuarios u ON a.cliente_id = u.id
@@ -292,7 +292,7 @@ def listar_agendamentos_funcionario(funcionario_id, data_filtro=None):
         else:
             cursor.execute('''
                 SELECT a.id, u.nome as cliente, u.telefone, u.whatsapp, s.nome as servico,
-                       datetime(a.data_hora, 'localtime') as data_hora_formatada, 
+                       strftime('%d/%m/%Y às %H:%M', a.data_hora) as data_hora_formatada, 
                        a.status, a.valor, a.data_hora
                 FROM agendamentos a
                 JOIN usuarios u ON a.cliente_id = u.id
@@ -308,7 +308,7 @@ def listar_agendamentos_por_status(status):
         cursor = conn.cursor()
         cursor.execute('''
             SELECT a.id, u.nome as cliente, u.telefone, u.whatsapp, uf.nome as funcionario, 
-                   s.nome as servico, datetime(a.data_hora, 'localtime') as data_hora_formatada, 
+                   s.nome as servico, strftime('%d/%m/%Y às %H:%M', a.data_hora) as data_hora_formatada, 
                    a.status, a.valor
             FROM agendamentos a
             JOIN usuarios u ON a.cliente_id = u.id
@@ -318,6 +318,23 @@ def listar_agendamentos_por_status(status):
             WHERE a.status = ?
             ORDER BY a.data_hora ASC
         ''', (status,))
+        return cursor.fetchall()
+
+def listar_agendamentos_cliente(cliente_id):
+    """Lista agendamentos de um cliente"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT a.id, uf.nome as funcionario, s.nome as servico,
+                   strftime('%d/%m/%Y às %H:%M', a.data_hora) as data_hora_formatada, 
+                   a.status, a.valor
+            FROM agendamentos a
+            JOIN funcionarios f ON a.funcionario_id = f.id
+            JOIN usuarios uf ON f.usuario_id = uf.id
+            JOIN servicos s ON a.servico_id = s.id
+            WHERE a.cliente_id = ?
+            ORDER BY a.data_hora DESC
+        ''', (cliente_id,))
         return cursor.fetchall()
 
 def atualizar_status_agendamento(agendamento_id, novo_status):
@@ -603,7 +620,7 @@ def obter_agenda_funcionario_por_data(funcionario_id, data_inicio, data_fim):
         cursor = conn.cursor()
         cursor.execute('''
             SELECT a.id, u.nome as cliente, u.telefone, u.whatsapp, s.nome as servico,
-                   datetime(a.data_hora, 'localtime') as data_hora_formatada, 
+                   strftime('%d/%m/%Y às %H:%M', a.data_hora) as data_hora_formatada, 
                    a.status, a.valor, date(a.data_hora) as data_agendamento,
                    strftime('%H:%M', a.data_hora) as horario
             FROM agendamentos a

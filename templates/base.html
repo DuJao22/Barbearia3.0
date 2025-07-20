@@ -215,6 +215,90 @@
                 setTimeout(() => msg.remove(), 300);
             });
         }, 5000);
+        
+        // Função global para toggle de modais
+        window.toggleModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.toggle('active');
+                
+                if (modal.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        };
+        
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+        
+        // Formatação de datas brasileiras
+        window.formatarData = function(data) {
+            if (!data) return '';
+            const date = new Date(data);
+            return date.toLocaleDateString('pt-BR');
+        };
+        
+        window.formatarDataHora = function(dataHora) {
+            if (!dataHora) return '';
+            const date = new Date(dataHora);
+            return date.toLocaleString('pt-BR');
+        };
+        
+        // Formatação de valores monetários
+        window.formatarMoeda = function(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        };
+        
+        // Máscara para telefone
+        window.aplicarMascaraTelefone = function(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    if (value.length <= 10) {
+                        value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+                    } else {
+                        value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                    }
+                }
+                e.target.value = value;
+            });
+        };
+        
+        // Aplicar máscaras automaticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            // Máscara para telefones
+            const telefoneInputs = document.querySelectorAll('input[type="tel"]');
+            telefoneInputs.forEach(input => {
+                aplicarMascaraTelefone(input);
+            });
+            
+            // Recriar ícones após mudanças no DOM
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length > 0) {
+                        lucide.createIcons();
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
     </script>
 
     {% block extra_js %}{% endblock %}

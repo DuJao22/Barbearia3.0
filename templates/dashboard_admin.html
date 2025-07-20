@@ -131,14 +131,14 @@
                             </div>
                         </td>
                         <td>{{ agendamento[4] }}</td>
-                        <td>{{ agendamento[6] }}</td>
+                        <td class="date-display">{{ agendamento[6] }}</td>
                         <td>
                             <span class="badge badge-success">
                                 R$ {{ "%.2f"|format(agendamento[8]) }}
                             </span>
                         </td>
                         <td>
-                            <div class="flex gap-2">
+                            <div class="action-buttons">
                                 <a href="{{ url_for('confirmar_agendamento', agendamento_id=agendamento[0]) }}" 
                                    class="btn btn-success btn-sm">
                                     <i data-lucide="check"></i>
@@ -157,9 +157,10 @@
             </table>
         </div>
         {% else %}
-        <div class="text-center py-8">
-            <i data-lucide="check-circle" class="w-12 h-12 text-muted mx-auto mb-3"></i>
-            <p class="text-muted">Nenhum agendamento pendente</p>
+        <div class="empty-state">
+            <i data-lucide="check-circle" class="empty-icon"></i>
+            <h3>Nenhum agendamento pendente</h3>
+            <p>Todos os agendamentos estão confirmados ou não há novos agendamentos</p>
         </div>
         {% endif %}
     </div>
@@ -202,9 +203,10 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-8">
-            <i data-lucide="users" class="w-12 h-12 text-muted mx-auto mb-3"></i>
-            <p class="text-muted">Nenhum dado de performance disponível</p>
+        <div class="empty-state">
+            <i data-lucide="users" class="empty-icon"></i>
+            <h3>Nenhum dado de performance</h3>
+            <p>Os dados de performance aparecerão quando houver agendamentos concluídos</p>
         </div>
         {% endif %}
     </div>
@@ -264,6 +266,35 @@
 </div>
 
 <style>
+.action-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-2xl);
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--text-muted);
+    margin: 0 auto var(--spacing-lg);
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+    color: var(--text-muted);
+}
+
 .performance-item {
     padding: var(--spacing-md);
     background-color: var(--bg-tertiary);
@@ -362,6 +393,16 @@
     .grid-cols-4,
     .grid-cols-2 {
         grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 </style>

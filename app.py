@@ -263,6 +263,57 @@ def api_horarios_disponiveis():
     
     return jsonify({'horarios_disponiveis': []})
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('errors/500.html'), 500
+
+@app.context_processor
+def inject_utils():
+    """Injeta funções utilitárias nos templates"""
+    def format_currency(value):
+        """Formata valor como moeda brasileira"""
+        if value is None:
+            return "R$ 0,00"
+        return f"R$ {value:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    
+    def format_date(date_str):
+        """Formata data para padrão brasileiro"""
+        if not date_str:
+            return ""
+        try:
+            from datetime import datetime
+            if isinstance(date_str, str):
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                date_obj = date_str
+            return date_obj.strftime('%d/%m/%Y')
+        except:
+            return date_str
+    
+    def format_datetime(datetime_str):
+        """Formata data e hora para padrão brasileiro"""
+        if not datetime_str:
+            return ""
+        try:
+            from datetime import datetime
+            if isinstance(datetime_str, str):
+                date_obj = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                date_obj = datetime_str
+            return date_obj.strftime('%d/%m/%Y às %H:%M')
+        except:
+            return datetime_str
+    
+    return dict(
+        format_currency=format_currency,
+        format_date=format_date,
+        format_datetime=format_datetime
+    )
+
 @app.route('/pagamento_pix/<int:agendamento_id>')
 def pagamento_pix(agendamento_id):
     if 'usuario_id' not in session:
